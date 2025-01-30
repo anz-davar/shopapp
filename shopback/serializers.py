@@ -2,6 +2,7 @@
 
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import Product, Cart, CartItem, Customer, Feedback, Collection
 
@@ -29,6 +30,20 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims
+        token['is_staff'] = user.is_staff
+        token['is_superuser'] = user.is_superuser
+        token['username'] = user.username
+        # You can add more user fields here as needed
+
+        return token
 
 
 class CustomerSerializer(serializers.ModelSerializer):

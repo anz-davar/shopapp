@@ -18,7 +18,8 @@
 from django.urls import path
 from .views import ProductList, CartItemDetail, CartDetail, RegisterApi, CustomerList, CustomerDetail, CartList, \
     ProductListCreate, ProductRetrieveUpdateDestroy, CartItemCreateView, CartItemBulkCreateView, OrderCreateView, \
-    FeedbackList, FeedbackDetail, CollectionList, CollectionDetail, PublicOrderLookup, SalesReport, FeedbackReport
+    FeedbackList, FeedbackDetail, CollectionList, CollectionDetail, PublicOrderLookup, SalesReport, FeedbackReport, \
+    send_email_view, CustomTokenObtainPairView
 from rest_framework_simplejwt import views as jwt_views
 
 urlpatterns = [
@@ -30,7 +31,8 @@ urlpatterns = [
     path('cartitems/<int:pk>/', CartItemDetail.as_view(), name='cartitem-detail'), # url for updating cart items
     # path('cart/<int:pk>/', CartDetail.as_view()),  # Capture cart ID (pk)
     # path('cart/', CartDetail.as_view(), name='cart-detail'),
-    path('token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    # path('token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
     path('register', RegisterApi.as_view()),
     path('customers/', CustomerList.as_view(), name='customer-list'),
@@ -45,6 +47,6 @@ urlpatterns = [
     path('orders/public-lookup/', PublicOrderLookup.as_view(), name='public-order-lookup'),
     path('sales-report/', SalesReport.as_view(), name='sales-report'),
     path('feedback-report/', FeedbackReport.as_view(), name='feedback-report'),
-    # path('send-email/', SendSimpleEmailView.as_view(), name='send_simple_email'),
+    path('send-email/', send_email_view, name='send_email'),
 
 ]
