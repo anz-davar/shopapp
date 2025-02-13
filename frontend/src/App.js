@@ -37,6 +37,9 @@ function App() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [cart, setCart] = useState(null);
+    const [isStaff, setIsStaff] = useState(localStorage.getItem('isStaff') === 'true' || false);
+    const [isSuperuser, setIsSuperuser] = useState(localStorage.getItem('isSuperuser') === 'true' || false);
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -109,6 +112,14 @@ function App() {
             setUser(user.username);
             localStorage.setItem('token', response.data.access);
             localStorage.setItem('user', user.username);
+
+            const decodedToken = JSON.parse(atob(response.data.access.split('.')[1]));
+            setIsStaff(decodedToken.is_staff); // Set isStaff state
+            setIsSuperuser(decodedToken.is_superuser); // Set isSuperuser state
+            localStorage.setItem('isStaff', decodedToken.is_staff);
+            localStorage.setItem('isSuperuser', decodedToken.is_superuser);
+            console.log("is_staff:", decodedToken.is_staff);
+            console.log("is_superuser:", decodedToken.is_superuser);
             setError('');
         })
             .catch(e => {
@@ -122,6 +133,8 @@ function App() {
         setUser('');
         localStorage.setItem('token', '');
         localStorage.setItem('user', '');
+        localStorage.removeItem('isStaff');
+        localStorage.removeItem('isSuperuser');
     }
 
     async function signup(user = null) { // default user to null
@@ -138,6 +151,14 @@ function App() {
             setUser(user.username);
             localStorage.setItem('token', response.data.access_token);
             localStorage.setItem('user', user.username);
+
+            const decodedToken = JSON.parse(atob(response.data.access_token.split('.')[1]));
+            setIsStaff(decodedToken.is_staff); // Set isStaff state
+            setIsSuperuser(decodedToken.is_superuser); // Set isSuperuser state
+            localStorage.setItem('isStaff', decodedToken.is_staff);
+            localStorage.setItem('isSuperuser', decodedToken.is_superuser);
+            console.log("is_staff:", decodedToken.is_staff);
+            console.log("is_superuser:", decodedToken.is_superuser);
         })
             .catch(e => {
                 console.log(e);
@@ -154,24 +175,52 @@ function App() {
                 <Navbar.Brand as={Link} to="/">ProductsApp</Navbar.Brand>
                 <Nav className="me-auto">
                     {/*<Container>*/}
+                    {/*{user ? (*/}
+                    {/*    <>*/}
+                    {/*        <Link className="nav-link" to={"/products"}>New Order</Link>*/}
+                    {/*        <Link className="nav-link" to={"/customers"}>Customers</Link>*/}
+                    {/*        <Link className="nav-link" to={"/manage-products"}>Manage Products</Link>*/}
+                    {/*        <Link className="nav-link" to={"/orders"}>Orders</Link>*/}
+                    {/*        <Link className="nav-link" to={"/collections"}>Collections</Link>*/}
+                    {/*        <Link className="nav-link" to={"/customer-feedback"}>Customer feedback</Link>*/}
+                    {/*        <Link className="nav-link" to={"/sales-report"}>Sales report</Link>*/}
+                    {/*        <Link className="nav-link" to={"/feedback-report"}>Feedback report</Link>*/}
+                    {/*        <Link to="" className="nav-link" onClick={logout}>Logout ({user})</Link></>) : (*/}
+                    {/*    <>*/}
+                    {/*        <Link className="nav-link"*/}
+                    {/*              to={"login"}>Login</Link>*/}
+                    {/*        <Link className="nav-link" to={"/signup"}>Sign Up</Link>*/}
+                    {/*        <Link className="nav-link" to={"/customer-feedback"}>Customer feedback</Link>*/}
+                    {/*    </>*/}
+
+                    {/*)}*/}
                     {user ? (
                         <>
-                            <Link className="nav-link" to={"/products"}>New Order</Link>
-                            <Link className="nav-link" to={"/customers"}>Customers</Link>
-                            <Link className="nav-link" to={"/manage-products"}>Manage Products</Link>
-                            <Link className="nav-link" to={"/orders"}>Orders</Link>
-                            <Link className="nav-link" to={"/collections"}>Collections</Link>
-                            <Link className="nav-link" to={"/customer-feedback"}>Customer feedback</Link>
-                            <Link className="nav-link" to={"/sales-report"}>Sales report</Link>
-                            <Link className="nav-link" to={"/feedback-report"}>Feedback report</Link>
-                            <Link to="" className="nav-link" onClick={logout}>Logout ({user})</Link></>) : (
+                            {isStaff || isSuperuser ? (
+                                <>
+                                    <Link className="nav-link" to={"/products"}>New Order</Link>
+                                    <Link className="nav-link" to={"/customers"}>Customers</Link>
+                                    <Link className="nav-link" to={"/manage-products"}>Manage Products</Link>
+                                    <Link className="nav-link" to={"/orders"}>Orders</Link>
+                                    <Link className="nav-link" to={"/collections"}>Collections</Link>
+                                    <Link className="nav-link" to={"/customer-feedback"}>Customer feedback</Link>
+                                    <Link className="nav-link" to={"/sales-report"}>Sales report</Link>
+                                    <Link className="nav-link" to={"/feedback-report"}>Feedback report</Link>
+                                    <Link to="" className="nav-link" onClick={logout}>Logout ({user})</Link>
+                                </>
+                            ) : ( // User is logged in, but NOT staff/superuser
+                                <>
+                                    <Link className="nav-link" to={"/collections"}>Collections</Link>
+                                    <Link to="" className="nav-link" onClick={logout}>Logout ({user})</Link>
+                                </>
+                            )}
+                        </>
+                    ) : (
                         <>
-                            <Link className="nav-link"
-                                  to={"login"}>Login</Link>
+                            <Link className="nav-link" to={"/login"}>Login</Link>
                             <Link className="nav-link" to={"/signup"}>Sign Up</Link>
                             <Link className="nav-link" to={"/customer-feedback"}>Customer feedback</Link>
                         </>
-
                     )}
 
                     {/*</Container>*/}
@@ -267,7 +316,8 @@ function App() {
                                                                                                        token={token}/>}/>
                         <Route path="/orders" render={(props) => <OrderList {...props} token={token}/>}/>
                         <Route path="/collections" render={(props) => <CollectionWorker {...props} token={token}/>}/>
-                        <Route path="/customer-feedback" render={(props) => <UserFeedbackForm {...props} token={token}/>}/>
+                        <Route path="/customer-feedback"
+                               render={(props) => <UserFeedbackForm {...props} token={token}/>}/>
                         <Route path="/sales-report" render={(props) => <SalesReport {...props} token={token}/>}/>
                         <Route path="/feedback-report" render={(props) => <FeedbackReport {...props} token={token}/>}/>
 

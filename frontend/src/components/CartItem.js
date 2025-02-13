@@ -25,11 +25,11 @@ export function CartItem({ item, removeFromCart, setCartItems }) {
 
     return (
         <Stack direction="horizontal" gap={2} className="d-flex align-items-center">
-            <img
-                src={item.product.image}
-                style={{ width: "125px", height: "75px", objectFit: "cover" }}
-                alt={item.product.name} // Add alt attribute for accessibility
-            />
+            {/*<img*/}
+            {/*    src={item.product.image}*/}
+            {/*    style={{ width: "125px", height: "75px", objectFit: "cover" }}*/}
+            {/*    alt={item.product.name} // Add alt attribute for accessibility*/}
+            {/*/>*/}
             <div className="me-auto">
                 <div>
                     {item.product.name} {item.quantity > 1 && <span className="text-muted small">x{item.quantity}</span>}
